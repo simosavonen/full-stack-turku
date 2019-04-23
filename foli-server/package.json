@@ -2,5 +2,10 @@
   "name": "foli-server",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.4",
+    "request": "^2.88.0",
+    "socket.io": "^2.2.0"
+  }
 }
