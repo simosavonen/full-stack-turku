@@ -5,10 +5,24 @@
             [express :as e]))
 
 (defonce vehicles (atom []))
-(defonce timer (atom nil))
-(defonce sio-inst (atom nil))
+(defonce services (atom {}))
 
-(defn handle-parsed-json [json-data]
+(defn register! [name service]
+  (swap! services assoc name service))
+(defn service [name]
+  (get @services name))
+
+(defn stop-services! []
+  (when-let [server (service :server)]
+    (println "Close server...")
+    (.close server))
+  (when-let [timer (service :timer)]
+    (println "Stop timer...")
+    (js/clearTimeout timer)))
+
+(defn handle-parsed-json
+  "Takes the parsed JSON file and stores the vehicles in vehicles atom. Emits the data to listeners."
+  [json-data]
   (reset! vehicles [])
   (doall (for [entry (get-in json-data [:result :vehicles])]
     (let [k (first entry)
@@ -21,10 +35,12 @@
                 :latitude latitude
                 :longitude longitude})))))
   (println "Parsed" (count @vehicles) "vehicle locations")
-  (when @sio-inst
-    (.emit @sio-inst "vehicles" (clj->js @vehicles))))
+  (when-let [ws (service :websocket)]
+    (.emit ws "vehicles" (clj->js @vehicles))))
 
-(defn handle-result [res]
+(defn handle-result
+  "Takes the HTTP response and pipes it through GZIP since the content is compressed."
+  [res]
   (when (= (.-statusCode res) 200)
     (let [raw-data (atom "")
           unzip-stream (z/createGunzip)]
@@ -37,17 +53,10 @@
                                     (js->clj parsed-data :keywordize-keys true))))))))
 
 (defn fetch-foli-data! []
-  (-> (.get http "http://data.foli.fi/siri/vm"
-            handle-result)))
+  (.get http "http://data.foli.fi/siri/vm" handle-result))
 
-(defn start-timer []
-  (reset! timer (js/setInterval fetch-foli-data! 5000)))
-
-(defn reload! []
-  (println "Code updated.")
-  (when @timer
-    (js/clearTimeout @timer))
-  (start-timer))
+(defn start-timer! []
+  (register! :timer (js/setInterval fetch-foli-data! 5000)))
 
 (defn create-server! []
   (let [app (e)
@@ -58,8 +67,14 @@
                             (.emit io "vehicles" (clj->js @vehicles))))
     (.listen server 3000 (fn []
                            (println "Server listening on port 3000")))
-    (reset! sio-inst io)))
+    (register! :websocket io)
+    (register! :server server)))
+
+(defn reload! []
+  (stop-services!)
+  (start-timer!)
+  (create-server!))
 
 (defn main! []
-  (start-timer)
+  (start-timer!)
   (create-server!))
