@@ -7,6 +7,7 @@ Built on top of Shadow-CLJS.
 # Backend
 
 ```bash
+    cd foli-server
     shadow-cljs watch app
     # and in another terminal
     node target/main.js
@@ -15,6 +16,7 @@ Built on top of Shadow-CLJS.
 # Frontend
 
 ```bash
+    cd foli-client
     mkdir target && cp assets/index.html target
     shadow-cljs watch app
     # open localhost:8080 in browser.
