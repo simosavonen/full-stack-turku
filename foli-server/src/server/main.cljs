@@ -5,7 +5,6 @@
             [express :as e]))
 
 (defonce vehicles (atom []))
-(defonce timer (atom nil))
 (defonce services (atom {}))
 
 (defn register! [name service]
