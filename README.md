@@ -8,6 +8,7 @@ Built on top of Shadow-CLJS.
 
 ```bash
     cd foli-server
+    npm install
     shadow-cljs watch app
     # and in another terminal
     node target/main.js
@@ -17,6 +18,7 @@ Built on top of Shadow-CLJS.
 
 ```bash
     cd foli-client
+    npm install
     mkdir target && cp assets/index.html target
     shadow-cljs watch app
     # open localhost:8080 in browser.
