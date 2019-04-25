@@ -1,6 +1,6 @@
 # full-stack-turku
 
-Code for front- and backend for Full Stack course at Uni. of turku
+Code for front- and backend for Full Stack course at Uni. of Turku
 
 Built on top of Shadow-CLJS.
 
